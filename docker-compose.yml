@@ -1,11 +1,13 @@
 services:
   postgres:
-    image: postgres:15
+    image: postgres
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    user: "0" # Ejecutar como root
+    command: ["bash", "-c", "echo 'Ejecutando como root' && sleep infinity"]
     ports:
       - "5432:5432"
     volumes:
