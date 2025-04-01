@@ -24,6 +24,7 @@ export const register = async (req: Request, resp: Response) => {
       data: {
         email,
         password: hashedPassword,
+        role: "user",
       },
     });
     console.log(user);
