@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { comparePasswords, hashPassword } from "../services/password.service";
 import prisma from "../models/user";
-import { generateToken } from "../services/auth.service";
+import {
+  generateTokenForClient,
+  generateTokenForRegister,
+} from "../services/auth.service";
 import { error } from "console";
 
 export const register = async (req: Request, resp: Response) => {
@@ -31,7 +34,7 @@ export const register = async (req: Request, resp: Response) => {
 
     //token para autenticar al registrar y así dejar logueado
     //pasamos el usuario del registro y se lo pasamos al token y este retornara el usuario con su token que expira en 1 hora
-    const token = generateToken(user);
+    const token = generateTokenForRegister(user);
     //ahora definimos la respuesta
     resp.status(201).json({ token });
   } catch (error: any) {
@@ -71,7 +74,13 @@ export const login = async (req: Request, resp: Response): Promise<void> => {
       resp.status(401).json({ error: "usuario y contraseña no coinciden" });
       return;
     }
-    const token = generateToken(user);
+
+    const clientTokenPayload = {
+      email: user.email,
+      role: user.role,
+    };
+
+    const token = generateTokenForClient(clientTokenPayload);
     resp.status(200).json({ token });
   } catch (error) {
     console.log(error);
