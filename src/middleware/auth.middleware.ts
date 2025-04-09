@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import { UserPayload } from "../types/express";
+import { UserPayload } from "../interfaces/express";
 import jwt from "jsonwebtoken";
+import { handleJwtError } from "../utils/errors/JwtError";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -31,18 +32,11 @@ export const verifyToken = (
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as UserPayload;
 
-    req.user = decoded; //idk if this shit is going to work
+    req.user = decoded;
     next();
   } catch (error) {
     console.error("Error al varificar el token", error); // Es bueno loguear el error real
-    if (error instanceof jwt.TokenExpiredError) {
-      res.status(401).json({ message: "Token expirado" });
-    } else if (error instanceof jwt.JsonWebTokenError) {
-      res.status(401).json({ message: "Token inválido" });
-    } else {
-      res.status(500).json({ message: "Error interno al verificar el token" });
-    }
-    // No llames a next() si hubo un error
+    handleJwtError(error as jwt.JsonWebTokenError);
   }
 };
 
