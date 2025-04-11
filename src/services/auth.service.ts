@@ -7,7 +7,7 @@ import { hashPassword } from "../services/password.service";
 import { handlePrismaError } from "../utils/errors/PrismaError";
 
 //con una palabra secreta + el email + el password se generará el jwt para poder loguear
-const JWT_SECRET = process.env.JWT_SECRET || "Default-secret";
+const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
 
 export const createUser = async (email: string, password: string) => {
   try {
@@ -22,28 +22,24 @@ export const createUser = async (email: string, password: string) => {
         role: "user",
       },
     });
+
     return user;
   } catch (error) {
     handlePrismaError(error);
+    throw new Error("Error inesperado al crear el usuario");
   }
 };
 
 export const generateTokenForRegister = (user: User) => {
-  return jwt.sign(
-    {
-      id: user.id,
-      email: user.email,
-      password: user.password,
-      role: user.role,
-    },
-    JWT_SECRET,
-    { expiresIn: "1h" }
-  );
+  return jwt.sign(user, JWT_SECRET, { expiresIn: "1h" });
 };
 
 export const generateTokenForClient = (
   payloadForClient: TokenPayloadForClient
 ) => {
+  if (!JWT_SECRET) {
+    throw new Error("JWT_SECRET is not defined");
+  }
   return jwt.sign(payloadForClient, JWT_SECRET, { expiresIn: "1h" });
 };
 

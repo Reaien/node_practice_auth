@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { createUser, generateTokenForRegister } from "../services/auth.service";
+import { AppError } from "../utils/errors/AppError";
 
 export const register = async (req: Request, resp: Response) => {
   const { email, password } = req.body;
@@ -25,14 +26,11 @@ export const register = async (req: Request, resp: Response) => {
     //ahora definimos la respuesta
     resp.status(201).json({ token });
   } catch (error: any) {
-    if (error.message === "Email already exist") {
-      resp
-        .status(400)
-        .json({ message: "el email ingresado ya se encuentra en uso" });
-      return;
+    if (error instanceof AppError) {
+      resp.status(error.statusCode).json({ message: error.message });
+    } else {
+      console.log(error);
+      resp.status(500).json({ error: "Error al registrar el usuario" });
     }
-
-    console.log(error);
-    resp.status(500).json({ error: "Error al registrar el usuario" });
   }
 };

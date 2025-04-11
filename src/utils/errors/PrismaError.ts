@@ -1,6 +1,6 @@
 import { AppError } from "./AppError";
 
-export const handlePrismaError = (error: any) => {
+export const handlePrismaError = (error: any): never => {
   if (error?.code === "P2002" && error?.meta?.target?.includes("email")) {
     throw new AppError("El email ya está en uso", 400);
   }
